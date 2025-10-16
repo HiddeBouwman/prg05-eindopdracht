@@ -19,6 +19,21 @@ Wil ik de ingrediënten, bereidingstijd, kooktijd en instructies van een recept 
 Zodat ik het gerecht stap voor stap kan creëren.
 
 
+---
+# Changelog 16/10/2025:
+
+### - Updated app.blade.php in the layouts folder
+
+### - Updated web.php with new routes and middleware
+
+### - Added recipe_meals folder, with an index and show file
+
+### - Added create.blade.php in the recipes folder
+
+### - Added factories for Ingredients and Recipe_Meal
+
+---
+
 # Changelog 15/10/2025 at 12:30:
 
 ### - Added migrations for the following:

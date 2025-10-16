@@ -9,9 +9,9 @@
 </head>
 <body>
     <h1>{{$recipe->title}}</h1>
-    <p><strong>Beschrijving:</strong>{{$recipe->description}}</p>
-    <p><strong>Bereiding:</strong>{{$recipe->instructions}}</p>
-    <p><strong>Bereidingstijd:</strong>{{$recipe->prep_time}}</p>
-    <p><strong>Kooktijd:</strong>{{$recipe->cook_time}}</p>
+    <p><strong>Beschrijving:</strong> {{$recipe->description}}</p>
+    <p><strong>Bereiding:</strong> {{$recipe->instructions}}</p>
+    <p><strong>Bereidingstijd:</strong> {{$recipe->prep_time}}</p>
+    <p><strong>Kooktijd:</strong> {{$recipe->cook_time}}</p>
 </body>
 </html>

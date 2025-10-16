@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Ingredient;
+use App\Models\Recipe_Meal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class IngredientsFactory extends Factory
+class Recipe_MealFactory extends Factory
 {
-    protected $model = Ingredient::class;
+    protected $model = Recipe_Meal::class;
 
     public function definition(): array
     {

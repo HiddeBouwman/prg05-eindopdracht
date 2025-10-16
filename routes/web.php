@@ -3,19 +3,33 @@
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\IngredientsController;
+use App\Http\Controllers\RecipeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (){
     return view('welcome');
 });
 
+Route::get('/dashboard', function() {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
 Route::get('/ingredients', [IngredientsController::class, 'index'])->name('ingredients.index');
 Route::get('/ingredients/{id}', [IngredientsController::class, 'show'])->name('ingredients.show');
 
+// routes/web.php
 Route::get('/recipes', [\App\Http\Controllers\RecipeController::class, 'index'])->name('recipes.index');
-Route::get('/recipes/{id}', [\App\Http\Controllers\RecipeController::class, 'show'])->name('recipes.show');
+Route::get('/recipes/create', [RecipeController::class, 'create'])->name('recipes.create');
+Route::post('/recipes', [RecipeController::class, 'store'])->name('recipes.store');
+Route::get('/recipes/{recipe}', [RecipeController::class, 'show'])->name('recipes.show');
+
+
+Route::get('/recipe_meals', [\App\Http\Controllers\RecipeMealController::class, 'index'])->name('recipe_meals.index');
+Route::get('/recipe_meals/{id}', [\App\Http\Controllers\RecipeMealController::class, 'show'])->name('recipe_meals.show');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/recipes/create', [RecipeController::class, 'create'])->name('recipes.create');
+    Route::post('/recipes', [RecipeController::class, 'store'])->name('recipes.store');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
