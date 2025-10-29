@@ -18,6 +18,28 @@ Als gebruiker
 Wil ik de ingrediënten, bereidingstijd, kooktijd en instructies van een recept kunnen zien
 Zodat ik het gerecht stap voor stap kan creëren.
 
+---
+# Changelog 29/10/2025
+
+after almost 2 weeks of no updates (vacation and just straight up forgetting to publish), a new version has  rolled out.
+
+### - Updated User.php with the function favoriteRecipes, though it has no real use case yet
+
+### - Updated views (index & show) for ingredients, but those views will most likely be removed with the next update
+
+### - Updated create page for recipes, mostly added missing functions and styling
+
+### - Created edit and favorites pages for recipes. favorites currently has no function
+
+### - Updated index page for recipes, added card images, and new styling and bugfixes
+
+### - Updated show page for recipes, added all of the missing content you couldn't see before.
+
+### - Created a searchbar in recipes, lets you look for recipe names or certain ingredients.
+
+### - New routes and Middleware added in web.php
+
+## - Important: A couple of views and routes will be removed in the next published version.
 
 ---
 # Changelog 16/10/2025:
