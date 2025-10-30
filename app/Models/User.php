@@ -46,8 +46,18 @@ class User extends Authenticatable
         ];
     }
 
+    public function recipes()
+    {
+        return $this->hasMany(Recipe::class);
+    }
+
     public function favoriteRecipes()
     {
         return $this->belongsToMany(Recipe::class, 'favorites')->withTimestamps();
+    }
+
+    public function getIsAdminAttribute()
+    {
+        return $this->role === 'admin';
     }
 }

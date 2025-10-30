@@ -2,10 +2,21 @@
 
 @section('content')
     <div class="container mx-auto px-4 py-8 cookbook-card p-6 rounded-lg">
-        <h1 class="text-5xl font-bold mb-4 cookbook-header text-center">{{ $recipe->title }}</h1>
+        <div class="relative">
+            <h1 class="text-5xl font-bold mb-4 cookbook-header text-center">{{ $recipe->title }}</h1>
+            @if(Auth::check() && Auth::id() !== $recipe->user_id)
+                <div class="absolute top-0 right-0">
+                    <button id="favorite-btn"
+                            class="text-3xl {{ Auth::user()->favoriteRecipes()->where('recipe_id', $recipe->id)->exists() ? 'text-red-500' : 'text-gray-400' }} hover:text-red-500 transition-colors">
+                        <i class="fas fa-heart" id="heart-icon"></i>
+                    </button>
+                </div>
+            @endif
+        </div>
 
         @if($recipe->image_url)
-            <img src="{{ asset('storage/' . $recipe->image_url) }}" alt="{{ $recipe->title }}" class="w-full h-64 object-cover rounded-lg mb-6">
+            <img src="{{ asset('storage/' . $recipe->image_url) }}" alt="{{ $recipe->title }}"
+                 class="w-full h-64 object-cover rounded-lg mb-6">
         @endif
 
         <p class="cookbook-text mb-4 text-center">{{ $recipe->description }}</p>
@@ -34,7 +45,8 @@
                     <h2 class="text-2xl font-semibold mb-4 cookbook-header text-center">Ingrediënten</h2>
                     <ul class="list-disc list-inside cookbook-text" id="ingredients-list">
                         @foreach($recipe->ingredients as $ingredient)
-                            <li data-original-amount="{{ $ingredient->pivot->amount }}" data-unit="{{ $ingredient->pivot->unit }}">
+                            <li data-original-amount="{{ $ingredient->pivot->amount }}"
+                                data-unit="{{ $ingredient->pivot->unit }}">
                                 <span class="amount-display">{{ $ingredient->pivot->amount }}</span>
                                 <span class="unit-display">{{ $ingredient->pivot->unit }}</span>
                                 {{ $ingredient->name }}
@@ -58,7 +70,8 @@
                     <h2 class="text-2xl font-semibold mb-4 cookbook-header text-center">Bereiding</h2>
                     @foreach($recipe->steps as $step)
                         <div class="flex items-start space-x-4 mb-4 bg-white p-3 rounded shadow-sm">
-                            <div class="flex-shrink-0 w-10 h-10 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold">
                                 {{ $step->step_number }}
                             </div>
                             <div class="cookbook-text">
@@ -83,18 +96,51 @@
         </div>
         <div class="text-center">
             <p>Geschreven door {{ $recipe->user->name }}</p>
-            <p class="text-sm">Gepubliceerd op {{ $recipe->created_at }} | Bijgewerkt op {{ $recipe->updated_at }}</p>
+            <p class="text-sm">Oorspronkelijk gepubliceerd op {{ $recipe->created_at }} | Bijgewerkt
+                op {{ $recipe->updated_at }}</p>
         </div>
-        <a href="{{ route('recipes.index') }}" class="mt-6 inline-block bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700">Terug naar recepten</a>
-
         @if(Auth::check() && Auth::id() === $recipe->user_id)
-            <a href="{{ route('recipes.edit', $recipe) }}" class="mt-6 inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 ml-4">Bewerk recept</a>
+            <div class="text-center mt-6">
+                <a href="{{ route('recipes.edit', $recipe) }}"
+                   class="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Bewerk recept</a>
+            </div>
         @endif
+
     </div>
 
     <script>
         const originalServings = {{ $recipe->servings }};
         let currentServings = originalServings;
+
+        @if(Auth::check() && Auth::id() !== $recipe->user_id)
+        document.getElementById('favorite-btn').addEventListener('click', function() {
+            const icon = document.getElementById('heart-icon');
+            const isFavorited = icon.classList.contains('text-red-500');
+
+            // Animation: scale and color change
+            icon.style.transform = 'scale(1.2)';
+            setTimeout(() => icon.style.transform = 'scale(1)', 200);
+
+            fetch('/recipes/{{ $recipe->id }}/toggle-favorite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.favorited) {
+                        icon.classList.remove('text-gray-400');
+                        icon.classList.add('text-red-500');
+                    } else {
+                        icon.classList.remove('text-red-500');
+                        icon.classList.add('text-gray-400');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+        @endif
 
         // dit hele stuk hier werkt niet eens
         function normalizeUnit(unit) {
@@ -134,7 +180,7 @@
 
                     // Format as fraction if needed
                     const fractionChars = ['½', '⅓', '⅔', '¼', '¾', '⅕', '⅖', '⅗', '⅘', '⅙', '⅚', '⅛', '⅜', '⅝', '⅞'];
-                    const fractions = [0.5, 1/3, 2/3, 0.25, 0.75, 0.2, 0.4, 0.6, 0.8, 1/6, 5/6, 0.125, 0.375, 0.625, 0.875];
+                    const fractions = [0.5, 1 / 3, 2 / 3, 0.25, 0.75, 0.2, 0.4, 0.6, 0.8, 1 / 6, 5 / 6, 0.125, 0.375, 0.625, 0.875];
                     let displayAmount = '';
                     let foundFraction = false;
                     for (let i = 0; i < fractions.length; i++) {

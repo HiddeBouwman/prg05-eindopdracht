@@ -17,7 +17,7 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $request->user()->load('recipes'),
         ]);
     }
 
@@ -35,6 +35,14 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    public function togglePublished(Request $request, $recipeId)
+    {
+        $recipe = Auth::user()->recipes()->findOrFail($recipeId);
+        $recipe->update(['is_published' => !$recipe->is_published]);
+
+        return response()->json(['is_published' => $recipe->is_published]);
     }
 
     /**

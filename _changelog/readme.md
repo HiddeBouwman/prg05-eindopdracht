@@ -18,7 +18,51 @@ Als gebruiker
 Wil ik de ingrediënten, bereidingstijd, kooktijd en instructies van een recept kunnen zien
 Zodat ik het gerecht stap voor stap kan creëren.
 
+# Changelog 30/10/2025 v1
+
+## A lot of important files apparently haven't been uploaded yet, so here they are.
+
+### - Added a My Recipes page, where you can easily see your own recipes. Here you can switch a toggle per recipe if it should pe published or not. Delete option coming very soon
+
+### - Added a favorite button on recipes that are not your own. Being able to see your favorites in a list will be coming soon
+
+### - Added the following controllers:
+- AboutController.php, RecipeController.php, RecipeEquipmentController.php, RecipeMealController.php, RecipeStepController.php and RecipeTipController.php
+
+### - Added the following models:
+- Ingredient.php, Recipe.php, Recipe_Meal.php, RecipeEquipment.php, RecipeStep.php and RecipeTip.php
+
+### - Added the following Factories:
+- RecipeEquipmentFactory.php, RecipeStepFactory.php and RecipeTip.php
+
+### - Added a lot of migrations. There's 19 new migrations total
+
+### - Added a new stylesheet in app.blade.php in the layouts folder. This is to load the heart emoji's for favoriting recipes
+
+### - Changed some navigation, Dashboard will be fazed out completely and recipes will be the new main page
+
+### - Apparently edit.blade.php in the profile folder has been changed, i have no idea what physically changed there
+
+### - Changed some styling in a lot of pages, most notably in create.blade.php
+
+### - If no recipes are found in the recipes index page, it now says so
+
+### - Added and Updated routes in web.php
+
+
+# - Admin options have been added
+New admin functions have been added, such as deleting recipes, as well as users.
+
+### - Added AdminController.php and AdminMiddleware.php,
+
+### - Updated bootstrap/app.php, added admin middleware
+
+### - Added admin views, such as dashboard, recipes and users
+
+
 ---
+
+
 # Changelog 29/10/2025
 
 after almost 2 weeks of no updates (vacation and just straight up forgetting to publish), a new version has  rolled out.
@@ -41,7 +85,10 @@ after almost 2 weeks of no updates (vacation and just straight up forgetting to 
 
 ## - Important: A couple of views and routes will be removed in the next published version.
 
+
 ---
+
+
 # Changelog 16/10/2025:
 
 ### - Updated app.blade.php in the layouts folder
@@ -54,7 +101,9 @@ after almost 2 weeks of no updates (vacation and just straight up forgetting to 
 
 ### - Added factories for Ingredients and Recipe_Meal
 
+
 ---
+
 
 # Changelog 15/10/2025 at 12:30:
 

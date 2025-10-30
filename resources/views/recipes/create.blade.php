@@ -48,7 +48,7 @@
                         <button type="button" onclick="removeItem(this)" class="bg-red-500 text-white px-2 py-1 rounded" style="display: none;">-</button>
                     </div>
                 </div>
-                <button type="button" onclick="addIngredient()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6 cookbook-text">+ Ingrediënt</button>
+                <button type="button" onclick="addIngredient()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6">+ Ingrediënt</button>
             </div>
 
             <div class="bg-gray-100 p-4 rounded-lg mb-4">
@@ -59,7 +59,7 @@
                         <button type="button" onclick="removeItem(this)" class="bg-red-500 text-white px-2 py-1 rounded" style="display: none;">-</button>
                     </div>
                 </div>
-                <button type="button" onclick="addEquipment()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6 cookbook-text">+ Benodigdheid</button>
+                <button type="button" onclick="addEquipment()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6">+ Benodigdheid</button>
             </div>
 
             <div class="bg-orange-100 p-4 rounded-lg mb-4">
@@ -71,21 +71,21 @@
                         <input type="text" name="steps[0][tip]" placeholder="Optionele tip" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" style="font-style: italic; color: #ff69b4;">
                     </div>
                 </div>
-                <button type="button" onclick="addStep()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-2 cookbook-text">+ Stap</button>
-                <button type="button" onclick="removeLastStep()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mb-6 cookbook-text">Verwijder laatste stap</button>
+                <button type="button" onclick="addStep()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-2">+ Stap</button>
+                <button type="button" onclick="removeLastStep()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mb-6">Verwijder laatste stap</button>
             </div>
 
             <div class="bg-red-100 p-4 rounded-lg mb-4">
                 <h3 class="text-xl font-semibold mb-4 cookbook-header text-center">Algemene Tips</h3>
                 <div id="tips" class="space-y-2 mb-6">
                     <div class="tip-group">
-                        <input type="text" name="tips[0][text]" placeholder="Bijv. serveer direct..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white cookbook-text">
+                        <input type="text" name="tips[0][text]" placeholder="Bijv. serveer direct..." class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                     </div>
                 </div>
-                <button type="button" onclick="addTip()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6 cookbook-text">+ Tip</button>
+                <button type="button" onclick="addTip()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6">+ Tip</button>
             </div>
 
-            <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 cookbook-text">Recept opslaan</button>
+            <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Recept opslaan</button>
         </form>
     </div>
 
