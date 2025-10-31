@@ -123,9 +123,14 @@ class RecipeController extends Controller
     public function index(Request $request)
     {
         $query = $request->input('search');
+        $publishedStart = $request->input('published_start');
+        $publishedEnd = $request->input('published_end');
+        $updatedStart = $request->input('updated_start');
+        $updatedEnd = $request->input('updated_end');
+        $sortOrder = $request->input('sort_order', 'newest'); // Default to newest
+        $totalTimeMax = $request->input('total_time_max');
 
         $recipes = Recipe::where('is_published', true)
-            ->orderBy('created_at', 'desc')
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($subQ) use ($query) {
                     $subQ->where('title', 'like', '%' . $query . '%')
@@ -135,6 +140,23 @@ class RecipeController extends Controller
                         });
                 });
             })
+            ->when($publishedStart, function ($q) use ($publishedStart){
+                $q->where('created_at', '>=', $publishedStart);
+            })
+            ->when($publishedEnd, function ($q) use ($publishedEnd){
+                $q->where('created_at', '<=', $publishedEnd);
+            })
+            ->when($updatedStart, function ($q) use ($updatedStart){
+                $q->where('created_at', '>=', $updatedStart);
+            })
+            ->when($updatedEnd, function ($q) use ($updatedEnd){
+                $q->where('created_at', '<=', $updatedEnd);
+            })
+            ->when($request->filled('total_time_max'), function ($q) use ($request) {
+                $totalTimeMax = (int) $request->input('total_time_max');
+                $q->whereRaw('(COALESCE(prep_time, 0) + COALESCE(cook_time, 0)) <= ?', [$totalTimeMax]);
+            })
+            ->orderBy('created_at', $sortOrder === 'oldest' ? 'asc' : 'desc')
             ->paginate(12);
 
         if ($request->ajax()) {
@@ -144,7 +166,7 @@ class RecipeController extends Controller
             ]);
         }
 
-        return view('recipes.index', compact('recipes', 'query'));
+        return view('recipes.index', compact('recipes', 'query', 'publishedStart', 'publishedEnd', 'updatedStart', 'updatedEnd', 'sortOrder', 'totalTimeMax'));
     }
 
     public function edit(Recipe $recipe)
@@ -272,14 +294,25 @@ class RecipeController extends Controller
 
     public function search(Request $request)
     {
-        $query = $request->input('query');
-        $recipes = Recipe::where('is_published', true)
-            ->where(function ($q) use ($query) {
-                $q->where('title', 'like', "%{$query}%")
-                    ->orWhere('description', 'like', "%{$query}%");
-            })
-            ->get();
-        return view('recipes.search', compact('recipes', 'query'));
+        $query = $request->get('query');
+
+        $recipes = Recipe::with('user')
+            ->where('title', 'like', '%' . $query . '%')
+            ->orWhere('description', 'like', '%' . $query . '%')
+            ->orWhereHas('ingredients', function ($q) use ($query) {
+                $q->where('name', 'like', '%' . $query . '%');
+            });
+        /**
+         *
+         * ->orWhereHas('users', function ($q) use ($query) {
+         * $q->where('name', 'like', '%' . $query . '%');
+         * })
+         * ->get();
+         *
+         * Dit ding werkt niet, geen idee hoe dat komt
+         */
+
+        return view('recipes.index', compact('recipes'));
     }
 
     public function filter(Request $request)
@@ -293,5 +326,15 @@ class RecipeController extends Controller
         return view('recipes.index', compact('recipes'));
     }
 
+    public function deleteRecipe(Recipe $recipe)
+    {
+        if ($recipe->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $recipe->delete();
+
+        return redirect()->route('recipes.my')->with('success', 'Recipe deleted successfully.');
+    }
 
 }

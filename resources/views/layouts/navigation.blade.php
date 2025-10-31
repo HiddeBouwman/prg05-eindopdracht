@@ -17,8 +17,7 @@
                 </div>
             </div>
 
-            <!-- Search Bar -->
-            <div class="flex-1 flex justify-center px-2 lg:ml-6 lg:justify-end">
+            <div class="flex-1 flex justify-center items-center px-2">
                 <div class="max-w-lg w-full lg:max-w-xs">
                     <form id="search-form" method="GET" action="{{ route('recipes.index') }}" class="relative">
                         <label for="search" class="sr-only">Zoek recepten</label>
@@ -161,7 +160,6 @@
     });
 
     //searchbar javascript zodat je niet die pagina hoeft te verversen dat was verschrikkelijk irritant
-    //searchbar javascript zodat je niet die pagina hoeft te verversen dat was verschrikkelijk irritant
     document.getElementById('search').addEventListener('input', function () {
         const query = this.value;
         fetch('{{ route("recipes.index") }}?search=' + encodeURIComponent(query), {
@@ -198,8 +196,6 @@
             .catch(error => console.error('Error:', error));
     });
 
-
-    // Account dropdown toggle (desktop)
     @auth
     const accountMenuButton = document.getElementById('account-menu-button');
     const accountMenu = document.getElementById('account-menu');
@@ -208,7 +204,6 @@
         accountMenu.classList.toggle('hidden');
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', (event) => {
         if (!accountMenuButton.contains(event.target) && !accountMenu.contains(event.target)) {
             accountMenu.classList.add('hidden');

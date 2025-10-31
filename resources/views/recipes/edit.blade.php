@@ -62,7 +62,7 @@
                         </div>
                     @endif
                 </div>
-                <button type="button" onclick="addIngredient()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6 cookbook-text">+ Ingrediënt</button>
+                <button type="button" onclick="addIngredient()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6">+ Ingrediënt</button>
             </div>
 
             <div class="bg-gray-100 p-4 rounded-lg mb-4">
@@ -81,7 +81,7 @@
                         </div>
                     @endif
                 </div>
-                <button type="button" onclick="addEquipment()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6 cookbook-text">+ Benodigdheid</button>
+                <button type="button" onclick="addEquipment()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6">+ Benodigdheid</button>
             </div>
 
             <div class="bg-orange-100 p-4 rounded-lg mb-4">
@@ -102,8 +102,8 @@
                         </div>
                     @endif
                 </div>
-                <button type="button" onclick="addStep()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-2 cookbook-text">+ Stap</button>
-                <button type="button" onclick="removeLastStep()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mb-6 cookbook-text">Verwijder laatste stap</button>
+                <button type="button" onclick="addStep()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-2">+ Stap</button>
+                <button type="button" onclick="removeLastStep()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mb-6">Verwijder laatste stap</button>
             </div>
 
             <div class="bg-red-100 p-4 rounded-lg mb-4">
@@ -120,11 +120,21 @@
                         </div>
                     @endif
                 </div>
-                <button type="button" onclick="addTip()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6 cookbook-text">+ Tip</button>
+                <button type="button" onclick="addTip()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-6">+ Tip</button>
             </div>
 
-            <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 cookbook-text">Recept bijwerken</button>
+            <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Recept bijwerken</button>
         </form>
+
+        <div class="mt-6">
+            <form method="POST" action="{{ route('recipes.delete', $recipe) }}" onsubmit="return confirm('Weet je zeker dat je dit recept wilt verwijderen?')">
+                @csrf
+                @method('DELETE')
+                <x-primary-button type="submit" class="bg-red-600 hover:bg-red-700">
+                    Verwijder Recept
+                </x-primary-button>
+            </form>
+        </div>
     </div>
 
     <script>

@@ -18,7 +18,17 @@ Als gebruiker
 Wil ik de ingrediënten, bereidingstijd, kooktijd en instructies van een recept kunnen zien
 Zodat ik het gerecht stap voor stap kan creëren.
 
-# Changelog 30/10/2025 v1
+# Changelog 31/10/2025
+
+### Users now have the ability to delete their own recipes
+
+### More filtering options are now available on the recipes page
+
+### bugfixes and language parity
+
+---
+
+# Changelog 30/10/2025
 
 ## A lot of important files apparently haven't been uploaded yet, so here they are.
 

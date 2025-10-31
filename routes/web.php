@@ -4,10 +4,11 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function (){
-    return view('welcome');
+    return view('recipes.show');
 });
 
 Route::get('/dashboard', function() {
@@ -16,6 +17,7 @@ Route::get('/dashboard', function() {
 
 
 // routes/web.php
+Route::get('/', [RecipeController::class, 'index'])->name('home');
 Route::get('/recipes', [\App\Http\Controllers\RecipeController::class, 'index'])->name('recipes.index');
 Route::get('/recipes/create', [RecipeController::class, 'create'])->name('recipes.create');
 Route::post('/recipes', [RecipeController::class, 'store'])->name('recipes.store');
@@ -38,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/recipes/favorites', [RecipeController::class, 'favorites'])->name('recipes.favorites');
     Route::post('/recipes/{recipe}/toggle-favorite', [RecipeController::class, 'toggleFavorite'])->name('recipes.toggle-favorite');
     Route::get('/recipes/search', [RecipeController::class, 'search'])->name('recipes.search');
+    Route::delete('/recipes/{recipe}', [RecipeController::class, 'deleteRecipe'])->name('recipes.delete');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -46,6 +49,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
     Route::get('/admin/recipes', [AdminController::class, 'recipes'])->name('admin.recipes');
     Route::delete('/admin/recipes/{recipe}', [AdminController::class, 'deleteRecipe'])->name('admin.recipes.delete');
+});
+
+Route::get('/logout', function () {
+    Auth::logout();
+    return redirect('/');
 });
 
 require __DIR__.'/auth.php';

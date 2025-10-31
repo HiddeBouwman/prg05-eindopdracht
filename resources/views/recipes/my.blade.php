@@ -27,6 +27,7 @@
                             </p>
                             <div class="flex items-center justify-between mt-4">
                                 <a href="{{ route('recipes.show', $recipe) }}" class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700">Bekijk recept</a>
+                                <a href="{{ route('recipes.edit', $recipe) }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Bewerk recept</a>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" class="sr-only toggle-published" data-recipe-id="{{ $recipe->id }}" {{ $recipe->is_published ? 'checked' : '' }}>
                                     <div class="px-4 py-2 rounded-md shadow-inner transition-colors duration-300 h-10 w-40 {{ $recipe->is_published ? 'bg-green-500' : 'bg-red-500' }} flex items-center justify-center text-white font-semibold">

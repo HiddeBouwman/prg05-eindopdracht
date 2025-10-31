@@ -12,7 +12,7 @@
 
                     {{-- Recipe Details --}}
                     <div class="flex-1">
-                        <h1 class="text-2xl font-semibold text-center">
+                        <h1 class="text-2xl font-semibold text-center mt-2">
                             <a href="{{ route('recipes.show', $recipe->id) }}"
                                class="text-blue-600 hover:text-blue-800">
                                 {{ $recipe->title }}
@@ -20,7 +20,7 @@
                         </h1>
                         <p class="text-gray-600">{{ Str::limit($recipe->description, 100) }}</p>
                     </div>
-                    Status: {{ $recipe->is_published ? 'Gepubliceerd' : 'Concept' }}
+                    <p class="mt-2 mb-4">Status: {{ $recipe->is_published ? 'Gepubliceerd' : 'Concept' }}</p>
 
                     <form action="{{ route('admin.recipes.delete', $recipe) }}" method="POST"
                           onsubmit="return confirm('Weet je zeker dat je dit recept wilt verwijderen?')">
