@@ -11,15 +11,20 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('recipes.index')" :active="request()->routeIs('recipes.*')">
+                    <x-nav-link :href="route('recipes.index')" :active="request()->routeIs('recipes.*') && !request()->routeIs('recipes.favorites')">
                         {{ __('Recepten') }}
                     </x-nav-link>
+                    @auth
+                    <x-nav-link :href="route('recipes.favorites')" :active="request()->routeIs('recipes.favorites')">
+                        {{ __('Favorieten') }}
+                    </x-nav-link>
+                    @endauth
                 </div>
             </div>
 
             <div class="flex-1 flex justify-center items-center px-2">
                 <div class="max-w-lg w-full lg:max-w-xs">
-                    <form id="search-form" method="GET" action="{{ route('recipes.index') }}" class="relative">
+                    <form id="search-form" method="GET" action="{{ url()->current() }}" class="relative">
                         <label for="search" class="sr-only">Zoek recepten</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -162,7 +167,8 @@
     //searchbar javascript zodat je niet die pagina hoeft te verversen dat was verschrikkelijk irritant
     document.getElementById('search').addEventListener('input', function () {
         const query = this.value;
-        fetch('{{ route("recipes.index") }}?search=' + encodeURIComponent(query), {
+        const form = document.getElementById('search-form');
+        fetch(form.action + '?search=' + encodeURIComponent(query), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',
@@ -190,7 +196,7 @@
                 }
                 const paginationContainer = document.querySelector('.pagination-container');
                 if (paginationContainer) paginationContainer.innerHTML = data.pagination;
-                const newUrl = '{{ route("recipes.index") }}' + (query ? '?search=' + encodeURIComponent(query) : '');
+                const newUrl = form.action + (query ? '?search=' + encodeURIComponent(query) : '');
                 history.pushState(null, '', newUrl);
             })
             .catch(error => console.error('Error:', error));

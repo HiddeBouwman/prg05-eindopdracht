@@ -4,14 +4,16 @@
     <div class="container mx-auto px-4 py-8 cookbook-card p-6 rounded-lg">
         <div class="relative">
             <h1 class="text-5xl font-bold mb-4 cookbook-header text-center">{{ $recipe->title }}</h1>
-            @if(Auth::check() && Auth::id() !== $recipe->user_id)
-                <div class="absolute top-0 right-0">
+            @auth
+                <div class="absolute top-0 right-0 flex flex-col items-center">
                     <button id="favorite-btn"
-                            class="text-3xl {{ Auth::user()->favoriteRecipes()->where('recipe_id', $recipe->id)->exists() ? 'text-red-500' : 'text-gray-400' }} hover:text-red-500 transition-colors">
+                            class="text-3xl {{ Auth::user()->favoriteRecipes()->where('recipe_id', $recipe->id)->exists() ? 'text-red-500' : 'text-gray-400' }} {{ Auth::id() === $recipe->user_id ? 'cursor-not-allowed opacity-50' : 'hover:text-red-500' }} transition-colors"
+                            {{ Auth::id() === $recipe->user_id ? 'disabled' : '' }}>
                         <i class="fas fa-heart" id="heart-icon"></i>
                     </button>
+                    <span id="favorite-count" class="text-sm text-gray-600">{{ $recipe->favoritedBy()->count() }}</span>
                 </div>
-            @endif
+            @endauth
         </div>
 
         @if($recipe->image_url)
@@ -29,6 +31,61 @@
                 <strong class="cookbook-header">Kooktijd:</strong> {{ $recipe->cook_time ?? 0 }} minuten
             </div>
         </div>
+
+        @auth
+            @if(Auth::id() !== $recipe->user_id)
+                <div class="flex flex-col items-center space-y-2 mb-6">
+                    <label class="cookbook-header text-xl">Beoordeling: {{ number_format($recipe->averageRating(), 1) }}</label>
+                    <form id="rating-form" method="POST" action="{{ route('recipes.rate', $recipe) }}">
+                        @csrf
+                        <div class="flex space-x-1">
+                            @for($i = 1; $i <= 5; $i++)
+                                <button type="button" class="star" data-rating="{{ $i }}">
+                                    @if($recipe->averageRating() >= $i)
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                    @elseif($recipe->averageRating() >= $i - 0.5)
+                                        <i class="fas fa-star-half-alt text-yellow-500"></i>
+                                    @else
+                                        <i class="far fa-star text-gray-400"></i>
+                                    @endif
+                                </button>
+                            @endfor
+                        </div>
+                        <input type="hidden" name="rating" id="rating-input" value="{{ Auth::user()->ratings()->where('recipe_id', $recipe->id)->first()->rating ?? 0 }}">
+                    </form>
+                </div>
+            @else
+                <div class="flex flex-col items-center space-y-2 mb-6">
+                    <label class="cookbook-header text-xl">Rating: {{ $recipe->averageRating() ? number_format($recipe->averageRating(), 1) : 'n/a' }}</label>
+                    <div class="flex space-x-1">
+                        @for($i = 1; $i <= 5; $i++)
+                            @if($recipe->averageRating() >= $i)
+                                <i class="fas fa-star text-yellow-500"></i>
+                            @elseif($recipe->averageRating() >= $i - 0.5)
+                                <i class="fas fa-star-half-alt text-yellow-500"></i>
+                            @else
+                                <i class="far fa-star text-gray-400"></i>
+                            @endif
+                        @endfor
+                    </div>
+                </div>
+            @endif
+        @else
+            <div class="flex flex-col items-center space-y-2 mb-6">
+                <label class="cookbook-header text-xl">Beoordeling: {{ $recipe->averageRating() !== null ? number_format($recipe->averageRating(), 1) : 'n/a' }}</label>
+                <div class="flex space-x-1">
+                    @for($i = 1; $i <= 5; $i++)
+                        @if($recipe->averageRating() >= $i)
+                            <i class="fas fa-star text-yellow-500"></i>
+                        @elseif($recipe->averageRating() >= $i - 0.5)
+                            <i class="fas fa-star-half-alt text-yellow-500"></i>
+                        @else
+                            <i class="far fa-star text-gray-400"></i>
+                        @endif
+                    @endfor
+                </div>
+            </div>
+        @endauth
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div class="md:col-span-1">
@@ -133,24 +190,18 @@
                     if (data.favorited) {
                         icon.classList.remove('text-gray-400');
                         icon.classList.add('text-red-500');
+                        icon.classList.add('heart-bounce'); // Add bounce animation
+                        setTimeout(() => icon.classList.remove('heart-bounce'), 600);
                     } else {
                         icon.classList.remove('text-red-500');
                         icon.classList.add('text-gray-400');
                     }
+                    // Update favorite count
+                    document.getElementById('favorite-count').textContent = data.favoriteCount;
                 })
                 .catch(error => console.error('Error:', error));
         });
         @endif
-
-        // dit hele stuk hier werkt niet eens
-        function normalizeUnit(unit) {
-            const lowerUnit = unit.toLowerCase();
-            if (['kg', 'kilogram'].includes(lowerUnit)) return 'Kg';
-            if (['l', 'liter'].includes(lowerUnit)) return 'Liter';
-            if (lowerUnit === 'ml') return 'milliliter';
-            if (lowerUnit === 'g') return 'gram';
-            return unit;
-        }
 
         function updateIngredients() {
             const scale = currentServings / originalServings;
@@ -158,44 +209,8 @@
                 const originalAmount = parseFloat(li.dataset.originalAmount);
                 if (!isNaN(originalAmount)) {
                     let newAmount = originalAmount * scale;
-                    let unit = li.dataset.unit || '';
-
-                    // Unit conversions
-                    if (unit === 'kg' && newAmount < 1) {
-                        newAmount *= 1000;
-                        unit = 'g';
-                    } else if (unit === 'l' && newAmount < 1) {
-                        newAmount *= 1000;
-                        unit = 'ml';
-                    } else if (unit === 'g' && newAmount >= 1000) {
-                        newAmount /= 1000;
-                        unit = 'kg';
-                    } else if (unit === 'ml' && newAmount >= 1000) {
-                        newAmount /= 1000;
-                        unit = 'l';
-                    }
-
-                    // Normalize unit
-                    unit = normalizeUnit(unit);
-
-                    // Format as fraction if needed
-                    const fractionChars = ['½', '⅓', '⅔', '¼', '¾', '⅕', '⅖', '⅗', '⅘', '⅙', '⅚', '⅛', '⅜', '⅝', '⅞'];
-                    const fractions = [0.5, 1 / 3, 2 / 3, 0.25, 0.75, 0.2, 0.4, 0.6, 0.8, 1 / 6, 5 / 6, 0.125, 0.375, 0.625, 0.875];
-                    let displayAmount = '';
-                    let foundFraction = false;
-                    for (let i = 0; i < fractions.length; i++) {
-                        if (Math.abs(newAmount - fractions[i]) < 0.01) {
-                            displayAmount = fractionChars[i];
-                            foundFraction = true;
-                            break;
-                        }
-                    }
-                    if (!foundFraction) {
-                        displayAmount = newAmount % 1 === 0 ? newAmount.toString() : newAmount.toFixed(2);
-                    }
-
+                    let displayAmount = newAmount % 1 === 0 ? newAmount.toString() : newAmount.toFixed(2);
                     li.querySelector('.amount-display').textContent = displayAmount;
-                    li.querySelector('.unit-display').textContent = unit;
                 }
             });
         }
@@ -212,6 +227,72 @@
             currentServings++;
             document.getElementById('servings-display').textContent = currentServings;
             updateIngredients();
+        });
+
+        // Star rating script
+        const ratingForm = document.getElementById('rating-form');
+        const ratingInput = document.getElementById('rating-input');
+        const stars = ratingForm ? ratingForm.querySelectorAll('.star') : [];
+
+        function updateAverageStars(average) {
+            stars.forEach((star, index) => {
+                const icon = star.querySelector('i');
+                if (average >= index + 1) {
+                    icon.className = 'fas fa-star text-yellow-500';
+                } else if (average >= index + 1 - 0.5) {
+                    icon.className = 'fas fa-star-half-alt text-yellow-500';
+                } else {
+                    icon.className = 'far fa-star text-gray-400';
+                }
+            });
+        }
+
+        function highlightUserRating(userRating) {
+            stars.forEach((star, index) => {
+                if (index < userRating) {
+                    star.classList.add('user-rated');
+                } else {
+                    star.classList.remove('user-rated');
+                }
+            });
+        }
+
+        // Set initial user rating highlight
+        const initialUserRating = parseInt(ratingInput.value) || 0;
+        highlightUserRating(initialUserRating);
+
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.dataset.rating);
+                ratingInput.value = rating;
+
+                // Submit via AJAX
+                const formData = new FormData(ratingForm);
+                fetch(ratingForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the average rating stars
+                        updateAverageStars(data.average);
+                        // Highlight the user's new rating
+                        highlightUserRating(rating);
+                        // Update the label
+                        const label = document.querySelector('label.cookbook-header');
+                        if (label) {
+                            label.textContent = 'Beoordeling: ' + (data.average !== null ? data.average.toFixed(1) : 'n/a');
+                        }
+                    } else if (data.error) {
+                        alert(data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
         });
     </script>
 @endsection

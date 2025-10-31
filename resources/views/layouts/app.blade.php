@@ -34,6 +34,32 @@
         .cookbook-text {
             color: #654321; /* Dark brown */
         }
+        .user-rated {
+            position: relative;
+            z-index: 10;
+        }
+        /** Dit hier beneden is nodig om je eigen recensies te laten zien. ik ga dit niet uitleggen. */
+        .user-rated::before {
+            content: '\f005';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 600;
+            color: #00429a;
+            font-size: 1.2em;
+            position: absolute;
+            top: -0.1em;
+            left: -0.0958em; /* vreemd getal ik weet het */
+            z-index: -1;
+        }
+        @keyframes heart-bounce {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(0.9); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .heart-bounce {
+            animation: heart-bounce 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body class="font-sans antialiased">

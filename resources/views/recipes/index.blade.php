@@ -10,7 +10,7 @@
                     class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg mb-6 transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
                     <form id="filter-form" method="GET" action="{{ route('recipes.index') }}"
                           class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                        <!-- Publication Date Filter -->
+                        <!-- Publicatie Datum Filter, zwaar gebugged -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gepubliceerd
                                 van:</label>
@@ -24,7 +24,7 @@
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                         </div>
 
-                        <!-- Update Date Filter -->
+                        <!-- Update Datum Filter, ook zwaar gebugged -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bijgewerkt
                                 van:</label>
@@ -38,7 +38,7 @@
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                         </div>
 
-                        <!-- Sort Order Toggle -->
+                        <!-- Sorteren Toggle -->
                         <div>
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sortering:</label>
@@ -51,18 +51,25 @@
                             </select>
                         </div>
 
-                        <!-- Total Time Filter -->
+                        <!-- Totale Tijd Filter -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Maximale
                                 totale tijd:</label>
-                            <input type="number" name="total_time_max" value="{{ $totalTimeMax }}" min="0"
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                            <select name="total_time_max"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                <option value="" {{ !$totalTimeMax ? 'selected' : '' }}>Alle</option>
+                                <option value="10" {{ $totalTimeMax == 10 ? 'selected' : '' }}>10 minuten</option>
+                                <option value="20" {{ $totalTimeMax == 20 ? 'selected' : '' }}>20 minuten</option>
+                                <option value="30" {{ $totalTimeMax == 30 ? 'selected' : '' }}>30 minuten</option>
+                                <option value="45" {{ $totalTimeMax == 45 ? 'selected' : '' }}>45 minuten</option>
+                                <option value="60" {{ $totalTimeMax == 60 ? 'selected' : '' }}>1 uur</option>
+                                <option value="90" {{ $totalTimeMax == 90 ? 'selected' : '' }}>Anderhalf uur</option>
+                            </select>
                         </div>
 
-                        <!-- Submit Button -->
+                        <!-- Reset Knop -->
                         <div>
-                            <a href="{{ route('recipes.index') }}"
-                               class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">Reset</a>
+                            <button type="button" id="reset-btn" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">Reset</button>
                         </div>
                     </form>
                 </div>
@@ -150,6 +157,12 @@
         form.querySelectorAll('input, select').forEach(el => {
             el.addEventListener('input', fetchRecipes);
             el.addEventListener('change', fetchRecipes);
+        });
+
+        // Reset button functionality
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            form.reset();
+            fetchRecipes();
         });
     });
 </script>

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Recipe;
 use App\Models\Ingredient;
+use App\Models\Rating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class RecipeController extends Controller
@@ -137,6 +139,9 @@ class RecipeController extends Controller
                         ->orWhere('description', 'like', '%' . $query . '%')
                         ->orWhereHas('ingredients', function ($subSubQ) use ($query) {
                             $subSubQ->where('name', 'like', '%' . $query . '%');
+                        })
+                        ->orWhereHas('user', function ($subSubQ) use ($query) {
+                            $subSubQ->where('name', '=', $query);
                         });
                 });
             })
@@ -144,13 +149,13 @@ class RecipeController extends Controller
                 $q->where('created_at', '>=', $publishedStart);
             })
             ->when($publishedEnd, function ($q) use ($publishedEnd){
-                $q->where('created_at', '<=', $publishedEnd);
+                $q->where('created_at', '<=', $publishedEnd . ' 23:59:59');
             })
             ->when($updatedStart, function ($q) use ($updatedStart){
-                $q->where('created_at', '>=', $updatedStart);
+                $q->where('updated_at', '>=', $updatedStart);
             })
             ->when($updatedEnd, function ($q) use ($updatedEnd){
-                $q->where('created_at', '<=', $updatedEnd);
+                $q->where('updated_at', '<=', $updatedEnd . ' 23:59:59');
             })
             ->when($request->filled('total_time_max'), function ($q) use ($request) {
                 $totalTimeMax = (int) $request->input('total_time_max');
@@ -262,10 +267,48 @@ class RecipeController extends Controller
         return redirect()->route('recipes.show', $recipe)->with('success', 'Recept bijgewerkt!');
     }
 
-    public function myRecipes()
+    public function myRecipes(Request $request)
     {
-        $recipes = Auth::user()->recipes()->paginate(12);
-        return view('recipes.my', compact('recipes'));
+        $query = $request->input('search');
+        $publishedStart = $request->input('published_start');
+        $publishedEnd = $request->input('published_end');
+        $updatedStart = $request->input('updated_start');
+        $updatedEnd = $request->input('updated_end');
+        $sortOrder = $request->input('sort_order', 'newest');
+        $totalTimeMax = $request->input('total_time_max');
+
+        $recipes = Auth::user()->recipes()
+            ->when($query, function ($q) use ($query) {
+                $q->where('title', 'like', '%' . $query . '%')
+                    ->orWhere('description', 'like', '%' . $query . '%');
+            })
+            ->when($publishedStart, function ($q) use ($publishedStart){
+                $q->where('created_at', '>=', $publishedStart);
+            })
+            ->when($publishedEnd, function ($q) use ($publishedEnd){
+                $q->where('created_at', '<=', $publishedEnd . ' 23:59:59');
+            })
+            ->when($updatedStart, function ($q) use ($updatedStart){
+                $q->where('updated_at', '>=', $updatedStart);
+            })
+            ->when($updatedEnd, function ($q) use ($updatedEnd){
+                $q->where('updated_at', '<=', $updatedEnd . ' 23:59:59');
+            })
+            ->when($request->filled('total_time_max'), function ($q) use ($request) {
+                $totalTimeMax = (int) $request->input('total_time_max');
+                $q->whereRaw('(COALESCE(prep_time, 0) + COALESCE(cook_time, 0)) <= ?', [$totalTimeMax]);
+            })
+            ->orderBy('created_at', $sortOrder === 'oldest' ? 'asc' : 'desc')
+            ->paginate(12);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'recipes' => $recipes->items(),
+                'pagination' => $recipes->links()->toHtml(),
+            ]);
+        }
+
+        return view('recipes.my', compact('recipes', 'query', 'publishedStart', 'publishedEnd', 'updatedStart', 'updatedEnd', 'sortOrder', 'totalTimeMax'));
     }
 
     public function toggleFavorite(Recipe $recipe)
@@ -282,59 +325,97 @@ class RecipeController extends Controller
             $user->favoriteRecipes()->attach($recipe->id);
         }
 
-        return response()->json(['favorited' => !$isFavorited]);
+        return response()->json(['favorited' => !$isFavorited, 'favoriteCount' => $recipe->favoritedBy()->count()]);
     }
 
 
-    public function favorites()
+    public function favorites(Request $request)
     {
-        $recipes = Auth::user()->favoriteRecipes()->where('is_published', true)->get();
-        return view('recipes.favorites', compact('recipes'));
-    }
+        $query = $request->input('search');
+        $publishedStart = $request->input('published_start');
+        $publishedEnd = $request->input('published_end');
+        $updatedStart = $request->input('updated_start');
+        $updatedEnd = $request->input('updated_end');
+        $sortOrder = $request->input('sort_order', 'newest'); // Default to newest
+        $totalTimeMax = $request->input('total_time_max');
 
-    public function search(Request $request)
-    {
-        $query = $request->get('query');
+        $recipes = Auth::user()->favoriteRecipes()
+            ->where('is_published', true)
+            ->when($query, function ($q) use ($query) {
+                $q->where(function ($subQ) use ($query) {
+                    $subQ->where('title', 'like', '%' . $query . '%')
+                        ->orWhere('description', 'like', '%' . $query . '%')
+                        ->orWhereHas('ingredients', function ($subSubQ) use ($query) {
+                            $subSubQ->where('name', 'like', '%' . $query . '%');
+                        })
+                        ->orWhereHas('user', function ($subSubQ) use ($query) {
+                            $subSubQ->where('name', '=', $query);
+                        });
+                });
+            })
+            ->when($publishedStart || $publishedEnd, function ($q) use ($publishedStart, $publishedEnd) {
+                if ($publishedStart && $publishedEnd) {
+                    $q->whereBetween('created_at', [$publishedStart, $publishedEnd . ' 23:59:59']);
+                } elseif ($publishedStart) {
+                    $q->where('created_at', '>=', $publishedStart);
+                } elseif ($publishedEnd) {
+                    $q->where('created_at', '<=', $publishedEnd . ' 23:59:59');
+                }
+            })
+            ->when($updatedStart || $updatedEnd, function ($q) use ($updatedStart, $updatedEnd) {
+                if ($updatedStart && $updatedEnd) {
+                    $q->whereBetween('updated_at', [$updatedStart, $updatedEnd . ' 23:59:59']);
+                } elseif ($updatedStart) {
+                    $q->where('updated_at', '>=', $updatedStart);
+                } elseif ($updatedEnd) {
+                    $q->where('updated_at', '<=', $updatedEnd . ' 23:59:59');
+                }
+            })
+            ->when($request->filled('total_time_max'), function ($q) use ($request) {
+                $totalTimeMax = (int) $request->input('total_time_max');
+                $q->whereRaw('(COALESCE(prep_time, 0) + COALESCE(cook_time, 0)) <= ?', [$totalTimeMax]);
+            })
+            ->orderBy('created_at', $sortOrder === 'oldest' ? 'asc' : 'desc')
+            ->paginate(12);
 
-        $recipes = Recipe::with('user')
-            ->where('title', 'like', '%' . $query . '%')
-            ->orWhere('description', 'like', '%' . $query . '%')
-            ->orWhereHas('ingredients', function ($q) use ($query) {
-                $q->where('name', 'like', '%' . $query . '%');
-            });
-        /**
-         *
-         * ->orWhereHas('users', function ($q) use ($query) {
-         * $q->where('name', 'like', '%' . $query . '%');
-         * })
-         * ->get();
-         *
-         * Dit ding werkt niet, geen idee hoe dat komt
-         */
-
-        return view('recipes.index', compact('recipes'));
-    }
-
-    public function filter(Request $request)
-    {
-        $query = Recipe::query();
-        if ($request->has('title')) {
-            $query->where('title', 'like', '%' . $request->title . '%');
+        if ($request->ajax()) {
+            return response()->json([
+                'recipes' => $recipes->items(),
+                'pagination' => $recipes->links()->toHtml(),
+            ]);
         }
-        // Voeg meer filters toe indien nodig
-        $recipes = $query->get();
-        return view('recipes.index', compact('recipes'));
+
+        return view('recipes.favorites', compact('recipes', 'query', 'publishedStart', 'publishedEnd', 'updatedStart', 'updatedEnd', 'sortOrder', 'totalTimeMax'));
     }
 
-    public function deleteRecipe(Recipe $recipe)
+
+    public function rate(Request $request, Recipe $recipe)
     {
-        if ($recipe->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized');
+        \Log::info('Rate method called', ['user' => auth()->id(), 'recipe' => $recipe->id, 'rating' => $request->rating]);
+
+        $request->validate([
+            'rating' => 'required|integer|min:0|max:5',
+        ]);
+
+        if ($recipe->user_id === auth()->id()) {
+            return response()->json(['error' => 'You cannot rate your own recipe'], 403);
         }
 
-        $recipe->delete();
+        if (!auth()->user()->is_admin) {
+            $loginDays = DB::table('sessions')->where('user_id', auth()->id())->selectRaw('DATE(last_activity) as date')->distinct()->count();
+            if ($loginDays < 5) {
+                return response()->json(['error' => 'Je moet minimaal 5 verschillende dagen hebben ingelogd om te kunnen beoordelen.'], 403);
+            }
+        }
 
-        return redirect()->route('recipes.my')->with('success', 'Recipe deleted successfully.');
+        $rating = Rating::updateOrCreate(
+            ['user_id' => auth()->id(), 'recipe_id' => $recipe->id],
+            ['rating' => $request->rating]
+        );
+
+        \Log::info('Rating saved', ['rating_id' => $rating->id, 'rating_value' => $rating->rating]);
+
+        return response()->json(['success' => 'Rating saved', 'average' => $recipe->fresh()->averageRating()]);
     }
 
 }

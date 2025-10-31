@@ -39,6 +39,16 @@ class Recipe extends Model
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
     }
 
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function averageRating()
+    {
+        return $this->ratings()->count() > 0 ? $this->ratings()->avg('rating') : null;
+    }
+
     use HasFactory;
     protected $fillable = [
         'user_id',

@@ -56,6 +56,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Recipe::class, 'favorites')->withTimestamps();
     }
 
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
     public function getIsAdminAttribute()
     {
         return $this->role === 'admin';

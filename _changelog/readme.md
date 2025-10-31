@@ -18,7 +18,21 @@ Als gebruiker
 Wil ik de ingrediënten, bereidingstijd, kooktijd en instructies van een recept kunnen zien
 Zodat ik het gerecht stap voor stap kan creëren.
 
-# Changelog 31/10/2025
+# Changelog 31/10/2025 v2
+
+##  Added the rating system. You can now rate a recipe, but only if you've logged in for at least five days.
+
+## Filter options and the search bar have improved parity. AJAX is now by default.
+
+## Favorites now has an indicator of how many users have favorited a recipe. It's the number underneath the heart icon.
+
+### Deleted a bunch of unneccesary files
+
+### Added and deleted some routes
+
+---
+
+# Changelog 31/10/2025 v1
 
 ### Users now have the ability to delete their own recipes
 
