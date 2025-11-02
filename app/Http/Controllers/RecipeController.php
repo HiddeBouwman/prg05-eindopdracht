@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 
 class RecipeController extends Controller
 {
+    const RECIPES_PER_PAGE = 20; // de paginate varieerde telkens dus op deze manier zorg ik ervoor dat het overal gelijk is
+
     /**
      * Toon het formulier om een recept aan te maken.
      */
@@ -162,7 +164,7 @@ class RecipeController extends Controller
                 $q->whereRaw('(COALESCE(prep_time, 0) + COALESCE(cook_time, 0)) <= ?', [$totalTimeMax]);
             })
             ->orderBy('created_at', $sortOrder === 'oldest' ? 'asc' : 'desc')
-            ->paginate(12);
+            ->paginate(self::RECIPES_PER_PAGE);
 
         if ($request->ajax()) {
             return response()->json([
@@ -299,7 +301,7 @@ class RecipeController extends Controller
                 $q->whereRaw('(COALESCE(prep_time, 0) + COALESCE(cook_time, 0)) <= ?', [$totalTimeMax]);
             })
             ->orderBy('created_at', $sortOrder === 'oldest' ? 'asc' : 'desc')
-            ->paginate(12);
+            ->paginate(self::RECIPES_PER_PAGE);
 
         if ($request->ajax()) {
             return response()->json([
@@ -376,7 +378,7 @@ class RecipeController extends Controller
                 $q->whereRaw('(COALESCE(prep_time, 0) + COALESCE(cook_time, 0)) <= ?', [$totalTimeMax]);
             })
             ->orderBy('created_at', $sortOrder === 'oldest' ? 'asc' : 'desc')
-            ->paginate(12);
+            ->paginate(self::RECIPES_PER_PAGE);
 
         if ($request->ajax()) {
             return response()->json([
@@ -418,4 +420,15 @@ class RecipeController extends Controller
         return response()->json(['success' => 'Rating saved', 'average' => $recipe->fresh()->averageRating()]);
     }
 
+    // dit was blijkbaar verdwenen in een van de nieuwere versies
+    public function deleteRecipe(Recipe $recipe)
+    {
+        if ($recipe->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $recipe->delete();
+
+        return redirect()->route('recipes.my')->with('success', 'Recept verwijderd!');
+    }
 }

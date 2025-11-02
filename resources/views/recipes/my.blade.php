@@ -161,5 +161,40 @@
                 fetchRecipes();
             });
         }
+
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('toggle-published')) {
+                const recipeId = e.target.dataset.recipeId;
+                fetch(`/profile/recipes/${recipeId}/toggle-published`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the UI
+                    const label = e.target.closest('label');
+                    const toggleText = label.querySelector('.toggle-text');
+                    const toggleBg = label.querySelector('div');
+                    const dot = label.querySelector('.dot');
+                    if (e.target.checked) {
+                        toggleText.textContent = 'Gepubliceerd';
+                        toggleBg.classList.remove('bg-red-500');
+                        toggleBg.classList.add('bg-green-500');
+                        dot.classList.add('translate-x-[8.25rem]');
+                        dot.classList.remove('translate-x-1');
+                    } else {
+                        toggleText.textContent = 'Concept';
+                        toggleBg.classList.remove('bg-green-500');
+                        toggleBg.classList.add('bg-red-500');
+                        dot.classList.remove('translate-x-[8.25rem]');
+                        dot.classList.add('translate-x-1');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
     });
 </script>
