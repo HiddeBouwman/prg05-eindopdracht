@@ -18,6 +18,17 @@ Als gebruiker
 Wil ik de ingrediënten, bereidingstijd, kooktijd en instructies van een recept kunnen zien
 Zodat ik het gerecht stap voor stap kan creëren.
 
+# Changelog 2/11/2025
+
+### RecipeController now has a constant for pagination (20)
+
+### User.php model now has 'role' in protected $fillable array
+
+### AJAX functionality added (back) to my recipes page
+
+### Reordered web.php for a clearer view, added pseudocode after every route
+---
+
 # Changelog 31/10/2025 v2
 
 ##  Added the rating system. You can now rate a recipe, but only if you've logged in for at least five days.
